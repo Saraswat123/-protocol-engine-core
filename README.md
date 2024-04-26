@@ -1,25 +1,31 @@
-# Protocol Research Lab (PRL)
+# Protocol Engine Core
 
-A dedicated space for deep-dive research into Ethereum protocol engineering, distributed systems, and the integration of Generative AI in decentralized environments.
+Advanced engineering and analysis hub for high-performance distributed systems, consensus protocols, and Ethereum execution/consensus layers.
 
-## 🔬 Research Focus Areas
+## 🛠️ Core Engineering Domains
 
-### 1. Ethereum Protocol Engineering
-- **Differential Testing:** Using `hf-diff-test` to simulate hard fork transitions.
-- **EVM Internals:** Researching opcode behavior changes across Shanghai, Cancun, and Prague.
-- **State Sync Optimization:** Analysis of high-performance state replication in distributed ledgers.
+### 📡 Distributed Messaging & P2P
+- **Systems Analysis:** [chainbound/msg-rs](https://github.com/chainbound/msg-rs)
+- **Deep Dive:** Engineering low-latency messaging patterns and custom wire protocols for distributed state synchronization.
 
-### 2. AI Gen & AI Engineering
-- **LLM Orchestration:** Benchmarking LangChain vs. LlamaIndex for complex multi-agent workflows.
-- **RAG Systems:** Optimizing retrieval accuracy using hybrid vector/keyword search.
-- **Agentic AI:** Designing autonomous agents for protocol monitoring and anomaly detection.
+### 🗼 Ethereum Consensus & Beacon Layer
+- **Implementation Study:** [ackintosh/ray](https://github.com/ackintosh/ray)
+- **Deep Dive:** Architectural breakdown of Beacon Node internals and validator lifecycle management for high-fidelity simulations.
 
-## 📂 Repository Structure
+### 🤝 Consensus Mechanisms (BFT/HotStuff)
+- **Protocol Analysis:** [asonnino/hotstuff](https://github.com/asonnino/hotstuff)
+- **Deep Dive:** Optimizing Chained HotStuff variants, view-change efficiency, and safety/liveness proof verification.
 
-- `/eth-research`: Analysis of EIPs (e.g., EIP-4844, EIP-7702).
-- `/ai-benchmarks`: Comparative studies of LLM performance on protocol engineering tasks.
-- `/simulations`: State transition models and fuzzing results.
-- `/checkpoints`: Automated logs from ongoing research iterations.
+### 🏎️ MEV Infrastructure & Orderflow
+- **Pipeline Engineering:** [BuilderNet/FlowProxy](https://github.com/BuilderNet/FlowProxy)
+- **Deep Dive:** Scaling orderflow ingestion, multiplexing strategies, and low-latency proxying for production block builders.
 
-## 🚀 Active Projects
-- **[hf-diff-test](https://github.com/Saraswat123/hf-diff-test):** Hard Fork Differential Testing System.
+## 📂 Engineering Assets
+
+- `/messaging`: Performance benchmarks and protocol analysis for `msg-rs`.
+- `/consensus`: State-machine implementation notes for `hotstuff` variants.
+- `/beacon-chain`: Educational breakdowns of the Ethereum Beacon Layer via `ray`.
+- `/orderflow`: Architectural blueprints and latency profiling for `FlowProxy`.
+
+## 🚀 Projects
+- **[hf-diff-test](https://github.com/Saraswat123/hf-diff-test):** Hard Fork Differential Testing System using `revm`.

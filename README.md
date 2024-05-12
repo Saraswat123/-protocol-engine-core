@@ -16,12 +16,17 @@ Advanced engineering and analysis hub for high-performance distributed systems, 
 - **Protocol Analysis:** [asonnino/hotstuff](https://github.com/asonnino/hotstuff)
 - **Deep Dive:** Optimizing Chained HotStuff variants, view-change efficiency, and safety/liveness proof verification.
 
+### 🔌 eBPF Networking & P2P Observation
+- **Traffic Analysis:** [netbound/p2pflow](https://github.com/netbound/p2pflow)
+- **Deep Dive:** Leveraging eBPF CO-RE and BTF to observe kernel-level Ethereum P2P traffic and optimizing Beacon Node networking threads.
+
 ### 🏎️ MEV Infrastructure & Orderflow
 - **Pipeline Engineering:** [BuilderNet/FlowProxy](https://github.com/BuilderNet/FlowProxy)
 - **Deep Dive:** Scaling orderflow ingestion, multiplexing strategies, and low-latency proxying for production block builders.
 
 ## 📂 Engineering Assets
 
+- `/networking`: eBPF architecture, environment setup, and Holesky testnet results.
 - `/messaging`: Performance benchmarks and protocol analysis for `msg-rs`.
 - `/consensus`: State-machine implementation notes for `hotstuff` variants.
 - `/beacon-chain`: Educational breakdowns of the Ethereum Beacon Layer via `ray`.

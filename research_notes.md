@@ -18,3 +18,4 @@
 2026-03-21 09:51:00: consensus update - consensus partition tests
 2026-03-24 09:38:00: consensus update - scaffold consensus engine
 2026-03-21 20:47:00: consensus update - implement HotStuff node state machine
+2026-03-20 19:48:00: consensus update - add vote collection and quorum (2f+1)

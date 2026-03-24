@@ -19,3 +19,4 @@
 2026-03-24 09:38:00: consensus update - scaffold consensus engine
 2026-03-21 20:47:00: consensus update - implement HotStuff node state machine
 2026-03-20 19:48:00: consensus update - add vote collection and quorum (2f+1)
+2026-03-24 19:12:00: consensus update - implement 2-chain safety rule

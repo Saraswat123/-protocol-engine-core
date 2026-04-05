@@ -23,3 +23,4 @@
 2026-04-12 19:53:00: beacon-chain update - add BeaconState: slot, epoch, validators
 2026-04-06 12:17:00: beacon-chain update - implement simplified LMD-GHOST
 2026-04-12 11:38:00: beacon-chain update - process attestations
+2026-04-05 14:03:00: beacon-chain update - add epoch transition logic

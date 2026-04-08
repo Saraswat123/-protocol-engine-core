@@ -27,3 +27,4 @@
 2026-04-10 09:06:00: beacon-chain update - beacon chain unit tests
 2026-04-09 17:24:00: beacon-chain update - add BeaconState: slot, epoch, validators
 2026-04-09 13:00:00: beacon-chain update - implement simplified LMD-GHOST
+2026-04-08 18:00:00: beacon-chain update - process attestations

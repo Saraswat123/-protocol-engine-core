@@ -22,3 +22,4 @@
 2026-03-24 19:12:00: consensus update - implement 2-chain safety rule
 2026-04-12 19:53:00: beacon-chain update - add BeaconState: slot, epoch, validators
 2026-04-06 12:17:00: beacon-chain update - implement simplified LMD-GHOST
+2026-04-12 11:38:00: beacon-chain update - process attestations

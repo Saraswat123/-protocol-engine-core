@@ -20,3 +20,4 @@
 2026-03-21 20:47:00: consensus update - implement HotStuff node state machine
 2026-03-20 19:48:00: consensus update - add vote collection and quorum (2f+1)
 2026-03-24 19:12:00: consensus update - implement 2-chain safety rule
+2026-04-12 19:53:00: beacon-chain update - add BeaconState: slot, epoch, validators

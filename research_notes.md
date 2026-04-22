@@ -29,3 +29,4 @@
 2026-04-09 13:00:00: beacon-chain update - implement simplified LMD-GHOST
 2026-04-08 18:00:00: beacon-chain update - process attestations
 2026-04-25 15:05:00: messaging update - port msg-rs to tokio
+2026-04-22 10:39:00: messaging update - implement pub/sub broker

@@ -33,3 +33,4 @@
 2026-04-30 20:53:00: messaging update - add topic filtering
 2026-04-29 18:58:00: messaging update - throughput benchmarks with criterion
 2026-04-30 14:56:00: messaging update - port msg-rs to tokio
+2026-04-30 10:54:00: messaging update - implement pub/sub broker

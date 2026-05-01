@@ -36,3 +36,4 @@
 2026-04-30 10:54:00: messaging update - implement pub/sub broker
 2026-05-04 09:49:00: orderflow update - mempool priority queue (gas price)
 2026-05-03 11:50:00: orderflow update - implement block building logic
+2026-05-01 14:20:00: orderflow update - add FlowProxy routing logic

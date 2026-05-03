@@ -35,3 +35,4 @@
 2026-04-30 14:56:00: messaging update - port msg-rs to tokio
 2026-04-30 10:54:00: messaging update - implement pub/sub broker
 2026-05-04 09:49:00: orderflow update - mempool priority queue (gas price)
+2026-05-03 11:50:00: orderflow update - implement block building logic

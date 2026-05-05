@@ -38,3 +38,4 @@
 2026-05-03 11:50:00: orderflow update - implement block building logic
 2026-05-01 14:20:00: orderflow update - add FlowProxy routing logic
 2026-05-07 18:34:00: orderflow update - simulation tests for bundle ingestion
+2026-05-05 16:41:00: orderflow update - mempool priority queue (gas price)

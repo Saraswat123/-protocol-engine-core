@@ -40,3 +40,4 @@
 2026-05-07 18:34:00: orderflow update - simulation tests for bundle ingestion
 2026-05-05 16:41:00: orderflow update - mempool priority queue (gas price)
 2026-05-05 13:46:00: orderflow update - implement block building logic
+2026-05-15 12:20:00: cross-cutting update - port engine_sync to rust

@@ -46,3 +46,4 @@
 2026-05-15 12:11:00: cross-cutting update - cross-client benchmarks
 2026-05-18 21:40:00: cross-cutting update - add tracing-subscriber for logging
 2026-05-13 17:01:00: cross-cutting update - optimize async runtime
+2026-05-16 14:43:00: cross-cutting update - port engine_sync to rust

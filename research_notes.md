@@ -44,3 +44,4 @@
 2026-05-10 18:06:00: cross-cutting update - setup GitHub Actions CI
 2026-05-18 20:02:00: cross-cutting update - unify crates under Cargo workspace
 2026-05-15 12:11:00: cross-cutting update - cross-client benchmarks
+2026-05-18 21:40:00: cross-cutting update - add tracing-subscriber for logging

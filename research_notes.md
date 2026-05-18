@@ -42,3 +42,4 @@
 2026-05-05 13:46:00: orderflow update - implement block building logic
 2026-05-15 12:20:00: cross-cutting update - port engine_sync to rust
 2026-05-10 18:06:00: cross-cutting update - setup GitHub Actions CI
+2026-05-18 20:02:00: cross-cutting update - unify crates under Cargo workspace

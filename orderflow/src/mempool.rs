@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use tracing::debug;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Transaction {
@@ -32,6 +33,7 @@ impl Mempool {
 
     pub fn insert(&mut self, tx: Transaction) {
         let tip = tx.effective_tip(self.base_fee);
+        debug!(hash = hex::encode(&tx.hash[..4]), tip, "mempool insert");
         let key = (std::cmp::Reverse(tip), tx.nonce, tx.hash);
         self.ordered.insert(key, tx);
     }

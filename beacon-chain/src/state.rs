@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use tracing::{debug, info};
 
 pub const SLOTS_PER_EPOCH: u64 = 32;
 
@@ -77,6 +78,7 @@ impl BeaconState {
 
     pub fn advance_slot(&mut self) {
         self.slot += 1;
+        debug!(slot = self.slot, epoch = self.current_epoch(), "slot advanced");
     }
 
     pub fn proposer_index(&self) -> u64 {

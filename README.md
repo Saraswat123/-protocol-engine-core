@@ -33,6 +33,75 @@ Multi-crate Rust workspace for distributed systems, BFT consensus protocols, and
 - **Engine:** Simulates the consensus↔execution Engine API handshake.
 - **Core logic:** `forkchoiceUpdated` / `newPayload` message sequencing over Tokio channels.
 
+## Repository Structure
+
+```
+protocol-engine-core/
+├── Cargo.toml                          # workspace manifest
+│
+├── networking/                         # eBPF P2P observer
+│   └── src/
+│       ├── main.rs                     # eBPF loader entry point
+│       ├── flow_tracker.rs             # TCP flow state machine
+│       ├── peer_monitor.rs             # peer connection tracking
+│       ├── metrics.rs                  # RTT / bandwidth counters
+│       └── lib.rs
+│
+├── consensus/                          # HotStuff BFT
+│   ├── src/
+│   │   ├── block.rs                    # Block, BlockId
+│   │   ├── node.rs                     # HotStuffNode state machine
+│   │   ├── vote.rs                     # Vote, VoteCollector, QuorumCertificate
+│   │   ├── network.rs                  # async Tokio channel simulation
+│   │   └── lib.rs
+│   ├── tests/
+│   │   ├── hotstuff_sim.rs             # honest multi-view simulation
+│   │   ├── consensus_proptest.rs       # property-based fuzz (proptest)
+│   │   ├── partition_test.rs           # Byzantine / network partition
+│   │   └── fault_injection_test.rs     # dropped votes, replay, out-of-order
+│   └── benches/
+│       └── hotstuff_bench.rs           # criterion throughput benchmark
+│
+├── beacon-chain/                       # Ethereum beacon node (simplified)
+│   ├── src/
+│   │   ├── state.rs                    # BeaconState, Validator, slot/epoch logic
+│   │   ├── epoch.rs                    # process_epoch (rewards, finality)
+│   │   ├── attestation.rs              # AttestationPool
+│   │   ├── fork_choice.rs              # LMD-GHOST
+│   │   ├── focil.rs                    # EIP-7805 inclusion list enforcement
+│   │   ├── bin/slot_clock.rs           # runnable: beacon-slot-clock binary
+│   │   └── lib.rs
+│   └── tests/
+│       ├── beacon_tests.rs             # state transitions, epoch boundary
+│       └── focil_tests.rs              # ILAggregator, ILEnforcer
+│
+├── messaging/                          # pub/sub broker
+│   ├── src/
+│   │   ├── broker.rs                   # Broker fan-out
+│   │   ├── filter.rs                   # topic filter / matcher
+│   │   └── lib.rs
+│   └── tests/
+│       └── broker_tests.rs
+│
+├── orderflow/                          # EIP-1559 block builder
+│   ├── src/
+│   │   ├── mempool.rs                  # BTreeMap priority mempool
+│   │   ├── builder.rs                  # greedy gas-fill block builder
+│   │   ├── rpc.rs                      # EthRpcClient (JSON-RPC)
+│   │   ├── bin/block_builder.rs        # runnable: block-builder binary
+│   │   └── lib.rs
+│   ├── tests/
+│   │   ├── orderflow_tests.rs          # mempool unit tests
+│   │   └── rpc_tests.rs                # wiremock mock-server RPC tests
+│   └── benches/
+│       └── mempool_bench.rs            # criterion insert/drain benchmark
+│
+└── crates/
+    └── engine-sync/                    # Engine API handshake simulation
+        ├── src/lib.rs                  # forkchoiceUpdated / newPayload logic
+        └── tests/sync_tests.rs
+```
+
 ## Getting Started
 
 ```bash

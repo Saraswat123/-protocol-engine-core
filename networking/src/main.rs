@@ -1,25 +1,24 @@
-use aya::Bpf;
-use aya::programs::Tc;
-use tracing::info;
-
-pub mod tcp_flow_tracker;
-pub mod latency_probe;
+pub mod flow_tracker;
 pub mod metrics;
+pub mod peer_monitor;
+
+use tokio::net::TcpListener;
+use tracing::info;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    info!("🚀 Loading eBPF programs for P2P flow analysis...");
-    
-    // Load the BPF program
-    let mut bpf = Bpf::load(include_bytes!("../ebpf-programs/tc_flow.bpf.o"))?;
-    
-    // Attach to eth0 ingress
-    let program: &mut Tc = bpf.program_mut("tc_flow").unwrap().try_into()?;
-    program.load()?;
-    program.attach("eth0", aya::programs::TcAttachType::Ingress)?;
+    tracing_subscriber::fmt().init();
 
-    info!("✅ P2P Flow Tracker active on eth0. Monitoring TCP flows...");
-    
-    tokio::signal::ctrl_c().await?;
-    Ok(())
+    let listener = TcpListener::bind("0.0.0.0:9000").await?;
+    info!("P2P flow monitor listening on :9000");
+
+    let mut tracker = flow_tracker::FlowTracker::new();
+
+    loop {
+        let (stream, peer_addr) = listener.accept().await?;
+        info!(peer = %peer_addr, "new connection");
+        tracker.record_connection(peer_addr);
+
+        tokio::spawn(peer_monitor::handle_peer(stream, peer_addr));
+    }
 }

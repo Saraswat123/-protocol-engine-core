@@ -10,6 +10,7 @@ serde_json = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 hex = "0.4"
+reqwest = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

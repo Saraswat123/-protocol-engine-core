@@ -36,8 +36,4 @@ cargo build --release
 sudo ./target/release/networking --process geth
 ```
 
-## 📊 Project Timeline (2026)
-- **March:** Networking & eBPF Foundation.
-- **April:** Consensus & Beacon Chain Logic.
-- **May:** Messaging, Orderflow, and CI/CD.
-- **June:** Performance Benchmarking & Integration.
+

@@ -51,7 +51,7 @@ impl VoteCollector {
         }
         entry.push(vote);
 
-        if entry.len() >= self.threshold {
+        if entry.len() == self.threshold {
             let signers = entry.iter().map(|v| v.voter).collect();
             Some(QuorumCertificate { block_id, view, signers })
         } else {

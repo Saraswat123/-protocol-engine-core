@@ -1,5 +1,4 @@
 use consensus::{
-    block::Block,
     node::HotStuffNode,
     vote::{Vote, VoteCollector},
 };

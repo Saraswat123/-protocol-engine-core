@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tracing::{debug, info};
+use tracing::debug;
 
 pub const SLOTS_PER_EPOCH: u64 = 32;
 

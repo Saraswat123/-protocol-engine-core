@@ -1,7 +1,7 @@
 /// Partition test: simulate f Byzantine nodes (equivocate or stay silent).
 /// Safety invariant: honest nodes never commit conflicting blocks.
 use consensus::{
-    block::{Block, BlockId},
+    block::Block,
     node::HotStuffNode,
     vote::Vote,
 };

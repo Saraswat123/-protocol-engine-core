@@ -11,10 +11,17 @@ anyhow = { workspace = true }
 tracing = { workspace = true }
 hex = "0.4"
 reqwest = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[[bin]]
+name = "block-builder"
+path = "src/bin/block_builder.rs"
 
 [dev-dependencies]
 proptest = { workspace = true }
 criterion = { version = "0.5", features = ["html_reports"] }
+wiremock = "0.6"
+tokio = { workspace = true, features = ["test-util"] }
 
 [[bench]]
 name = "mempool_bench"

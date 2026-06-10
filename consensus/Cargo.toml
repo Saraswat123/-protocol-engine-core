@@ -16,6 +16,7 @@ hex = "0.4"
 proptest = { workspace = true }
 tokio = { workspace = true, features = ["test-util"] }
 criterion = { version = "0.5", features = ["html_reports"] }
+rand = "0.8"
 
 [[bench]]
 name = "hotstuff_bench"

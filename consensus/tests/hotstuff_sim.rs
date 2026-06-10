@@ -9,7 +9,6 @@ fn make_cluster(n: usize) -> Vec<HotStuffNode> {
 
 /// Run one full view: leader proposes, all replicas vote, leader collects QC, all advance.
 fn run_view(nodes: &mut Vec<HotStuffNode>, payload: Vec<u8>) {
-    let n = nodes.len();
     let leader_id = nodes[0].leader_for_view(nodes[0].view);
 
     // Leader proposes

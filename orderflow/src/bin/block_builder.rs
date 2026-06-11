@@ -58,7 +58,7 @@ async fn main() {
     info!(count = txs.len(), "pending txs fetched");
 
     // fill mempool
-    let mut pool = Mempool::new(base_fee);
+    let mut pool = Mempool::new(base_fee, tx_limit);
     for tx in txs {
         pool.insert(tx);
     }

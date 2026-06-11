@@ -13,15 +13,34 @@ fn make_tx(i: u8, gas_price: u64, max_fee: u64) -> Transaction {
     }
 }
 
-/// Mempool insert throughput at varying pool sizes.
+/// Unbounded insert throughput at varying pool sizes.
 fn bench_mempool_insert(c: &mut Criterion) {
     let mut group = c.benchmark_group("mempool_insert");
 
     for size in [10usize, 100, 500] {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
             b.iter(|| {
-                let mut pool = Mempool::new(black_box(10));
+                let mut pool = Mempool::new(black_box(10), 0);
                 for i in 0..size as u8 {
+                    pool.insert(make_tx(i, 15 + i as u64, 25 + i as u64));
+                }
+                black_box(pool.len())
+            });
+        });
+    }
+    group.finish();
+}
+
+/// Insert under cap pressure: pool full, every insert triggers eviction.
+fn bench_mempool_insert_with_eviction(c: &mut Criterion) {
+    let mut group = c.benchmark_group("mempool_insert_eviction");
+
+    for cap in [50usize, 200, 500] {
+        group.bench_with_input(BenchmarkId::from_parameter(cap), &cap, |b, &cap| {
+            b.iter(|| {
+                let mut pool = Mempool::new(black_box(10), cap);
+                // insert 2x cap — second half all trigger evictions
+                for i in 0..(cap * 2) as u8 {
                     pool.insert(make_tx(i, 15 + i as u64, 25 + i as u64));
                 }
                 black_box(pool.len())
@@ -39,7 +58,7 @@ fn bench_block_build(c: &mut Criterion) {
 
     for tx_count in [50usize, 200, 1000] {
         group.bench_with_input(BenchmarkId::from_parameter(tx_count), &tx_count, |b, &tx_count| {
-            let mut pool = Mempool::new(base_fee);
+            let mut pool = Mempool::new(base_fee, 0);
             for i in 0..tx_count as u8 {
                 pool.insert(make_tx(i, 15 + i as u64, 25 + i as u64));
             }
@@ -54,7 +73,7 @@ fn bench_block_build(c: &mut Criterion) {
     group.finish();
 }
 
-/// base_fee update cost: re-sort entire pool.
+/// base_fee update cost: re-sort entire pool (O(n log n), bounded by cap).
 fn bench_base_fee_update(c: &mut Criterion) {
     let mut group = c.benchmark_group("base_fee_update");
 
@@ -62,7 +81,7 @@ fn bench_base_fee_update(c: &mut Criterion) {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
             b.iter_batched(
                 || {
-                    let mut pool = Mempool::new(10);
+                    let mut pool = Mempool::new(10, 0);
                     for i in 0..size as u8 {
                         pool.insert(make_tx(i, 15 + i as u64, 25 + i as u64));
                     }
@@ -79,5 +98,11 @@ fn bench_base_fee_update(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_mempool_insert, bench_block_build, bench_base_fee_update);
+criterion_group!(
+    benches,
+    bench_mempool_insert,
+    bench_mempool_insert_with_eviction,
+    bench_block_build,
+    bench_base_fee_update
+);
 criterion_main!(benches);

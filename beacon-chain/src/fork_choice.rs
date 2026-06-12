@@ -38,7 +38,7 @@ impl ForkChoice {
             // pick child with highest vote weight; tie-break by lexicographic order
             let best = kids
                 .iter()
-                .max_by_key(|r| (self.pool.vote_weight(r), *r))
+                .max_by_key(|r| (self.pool.aggregate_vote_weight(r), *r))
                 .unwrap();
             current = *best;
         }

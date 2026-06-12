@@ -16,6 +16,32 @@ pub struct Attestation {
     pub target: Checkpoint,
 }
 
+// ── aggregate attestation ─────────────────────────────────────────────────────
+
+/// One aggregate covers all individual attestations for a (slot, target_root).
+/// Validators are deduplicated — each counted once regardless of how many
+/// times they submitted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AggregateAttestation {
+    pub slot: u64,
+    pub target_root: [u8; 32],
+    /// Sorted list of validator indices that signed this aggregate.
+    pub participating_validators: Vec<u64>,
+    pub vote_count: usize,
+}
+
+impl AggregateAttestation {
+    pub fn empty(slot: u64, target_root: [u8; 32]) -> Self {
+        Self { slot, target_root, participating_validators: vec![], vote_count: 0 }
+    }
+
+    pub fn includes(&self, validator_index: u64) -> bool {
+        self.participating_validators.binary_search(&validator_index).is_ok()
+    }
+}
+
+// ── pool ──────────────────────────────────────────────────────────────────────
+
 /// Tracks latest messages for LMD-GHOST and vote weight.
 pub struct AttestationPool {
     /// validator_index → latest attestation
@@ -41,6 +67,42 @@ impl AttestationPool {
             .values()
             .filter(|a| &a.beacon_block_root == root)
             .count()
+    }
+
+    /// Aggregate all attestations for a given (slot, target_root) pair.
+    /// Deduplicates by validator index; returns sorted participating set.
+    pub fn aggregate(&self, slot: u64, target_root: [u8; 32]) -> AggregateAttestation {
+        let mut validators: Vec<u64> = self.latest
+            .values()
+            .filter(|a| a.slot == slot && a.target.root == target_root)
+            .map(|a| a.validator_index)
+            .collect();
+
+        validators.sort_unstable();
+        validators.dedup();
+        let count = validators.len();
+
+        AggregateAttestation {
+            slot,
+            target_root,
+            participating_validators: validators,
+            vote_count: count,
+        }
+    }
+
+    /// Aggregate vote weight for a block root using the aggregated view.
+    /// Same result as `vote_weight` but goes through `AggregateAttestation`
+    /// to ensure deduplication semantics are enforced.
+    pub fn aggregate_vote_weight(&self, root: &[u8; 32]) -> usize {
+        // collect distinct validators whose latest message points to root
+        let mut validators: Vec<u64> = self.latest
+            .values()
+            .filter(|a| &a.beacon_block_root == root)
+            .map(|a| a.validator_index)
+            .collect();
+        validators.sort_unstable();
+        validators.dedup();
+        validators.len()
     }
 }
 

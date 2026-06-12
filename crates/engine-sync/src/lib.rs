@@ -46,6 +46,23 @@ pub enum EngineApiEvent {
     ChainReorg { old_head: BlockHash, new_head: BlockHash, depth: u64 },
 }
 
+// ── payload attributes (block building) ──────────────────────────────────────
+
+/// Passed with forkchoiceUpdated to trigger payload building.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PayloadAttributes {
+    pub timestamp: u64,
+    pub suggested_fee_recipient: [u8; 20],
+    pub prev_randao: [u8; 32],
+    /// Forced-inclusion transactions (FOCIL / EIP-7805 output).
+    pub transactions: Vec<Vec<u8>>,
+}
+
+/// In-flight payload build job.
+struct BuildJob {
+    payload: ExecutionPayload,
+}
+
 // ── execution layer state ─────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
@@ -113,6 +130,8 @@ pub struct EngineApi {
     pub exec: ExecutionState,
     gas_limit: u64,
     event_tx: mpsc::Sender<EngineApiEvent>,
+    build_jobs: HashMap<u64, BuildJob>,
+    next_payload_id: u64,
 }
 
 impl EngineApi {
@@ -121,6 +140,8 @@ impl EngineApi {
             exec: ExecutionState::genesis(genesis_hash),
             gas_limit,
             event_tx,
+            build_jobs: HashMap::new(),
+            next_payload_id: 1,
         }
     }
 
@@ -183,7 +204,14 @@ impl EngineApi {
     }
 
     /// engine_forkchoiceUpdated: update head/safe/finalized pointers.
-    pub async fn forkchoice_updated(&mut self, fcs: ForkchoiceState) -> ForkchoiceUpdatedResult {
+    ///
+    /// If `attrs` is `Some`, starts a payload build job and returns a
+    /// `payload_id`; retrieve the built payload with `get_payload(id)`.
+    pub async fn forkchoice_updated(
+        &mut self,
+        fcs: ForkchoiceState,
+        attrs: Option<PayloadAttributes>,
+    ) -> ForkchoiceUpdatedResult {
         if !self.exec.is_known(&fcs.head_block_hash) {
             warn!(head = ?fcs.head_block_hash, "forkchoice head unknown");
             return ForkchoiceUpdatedResult {
@@ -222,11 +250,46 @@ impl EngineApi {
             status: PayloadStatus::Valid,
         }).await;
 
+        // start payload build if attributes provided
+        let payload_id = if let Some(a) = attrs {
+            let id = self.next_payload_id;
+            self.next_payload_id += 1;
+
+            // derive block hash deterministically from head + timestamp
+            let mut hash = fcs.head_block_hash;
+            hash[0] ^= (a.timestamp & 0xff) as u8;
+            hash[1] ^= ((a.timestamp >> 8) & 0xff) as u8;
+
+            let head_num = self.exec.blocks.get(&fcs.head_block_hash)
+                .map(|b| b.number)
+                .unwrap_or(0);
+
+            let payload = ExecutionPayload {
+                block_hash: hash,
+                parent_hash: fcs.head_block_hash,
+                block_number: head_num + 1,
+                gas_limit: self.gas_limit,
+                gas_used: a.transactions.iter().map(|_| 21_000u64).sum(),
+                timestamp: a.timestamp,
+                transactions: a.transactions,
+            };
+            info!(payload_id = id, block_number = payload.block_number, "payload build started");
+            self.build_jobs.insert(id, BuildJob { payload });
+            Some(id)
+        } else {
+            None
+        };
+
         info!(head = ?self.exec.head, finalized = ?self.exec.finalized, "forkchoice updated");
         ForkchoiceUpdatedResult {
             payload_status: PayloadStatus::Valid,
-            payload_id: None,
+            payload_id,
         }
+    }
+
+    /// engine_getPayload: retrieve a previously built payload by id.
+    pub fn get_payload(&mut self, payload_id: u64) -> Option<ExecutionPayload> {
+        self.build_jobs.remove(&payload_id).map(|job| job.payload)
     }
 
     /// Estimate reorg depth between two forks by walking to common ancestor.

@@ -1,6 +1,6 @@
 use crate::{
     block::{Block, BlockId},
-    vote::{QuorumCertificate, Vote, VoteCollector},
+    vote::{NewViewMessage, QuorumCertificate, Vote, VoteCollector},
 };
 use std::collections::HashMap;
 use tracing::{debug, info};
@@ -94,6 +94,19 @@ impl HotStuffNode {
             self.high_qc = qc.clone();
         }
         Some(qc)
+    }
+
+    /// Called when a view timer fires and no proposal/QC arrived.
+    /// Increments view and returns a NewView message to send to the next leader.
+    pub fn on_timeout(&mut self) -> NewViewMessage {
+        let msg = NewViewMessage {
+            sender: self.id,
+            view: self.view,
+            high_qc: self.high_qc.clone(),
+        };
+        self.view += 1;
+        debug!(node = self.id, old_view = msg.view, new_view = self.view, "view timeout");
+        msg
     }
 
     /// Advance to next view after QC. Commit if 2-chain rule satisfied.

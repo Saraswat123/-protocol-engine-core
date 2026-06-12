@@ -3,7 +3,7 @@
 use crate::{
     block::Block,
     node::HotStuffNode,
-    vote::{QuorumCertificate, Vote},
+    vote::{NewViewCollector, NewViewMessage, QuorumCertificate, Vote},
 };
 use std::collections::HashMap;
 use tokio::sync::mpsc;
@@ -13,7 +13,10 @@ use tracing::{debug, info};
 pub enum Message {
     Proposal(Block),
     Vote(Vote),
+    /// Leader→replicas: QC formed, advance to next view.
     NewView(QuorumCertificate),
+    /// Replica→next-leader: I timed out, here is my high_qc.
+    ViewChange(NewViewMessage),
 }
 
 pub type NodeId = u64;
@@ -83,13 +86,21 @@ impl NetworkNode {
     }
 
     /// Run one view as replica: wait for proposal → vote → wait for QC.
+    /// On timeout at either step: sends ViewChange to the next-view leader.
     pub async fn run_replica_view(&mut self) -> bool {
         let timeout = tokio::time::Duration::from_millis(500);
 
         // wait for proposal
         let block = match tokio::time::timeout(timeout, self.rx.recv()).await {
             Ok(Some(Message::Proposal(b))) => b,
-            _ => return false,
+            _ => {
+                // proposal timeout → view-change
+                let nv = self.inner.on_timeout();
+                let next_leader = self.inner.leader_for_view(self.inner.view);
+                info!(node = self.inner.id, next_leader, "proposal timeout → ViewChange");
+                self.send_to(next_leader, Message::ViewChange(nv)).await;
+                return false;
+            }
         };
 
         self.inner.blocks.insert(block.id.clone(), block.clone());
@@ -105,7 +116,51 @@ impl NetworkNode {
                 self.inner.advance_view(qc);
                 true
             }
-            _ => false,
+            _ => {
+                // QC timeout → view-change
+                let nv = self.inner.on_timeout();
+                let next_leader = self.inner.leader_for_view(self.inner.view);
+                info!(node = self.inner.id, next_leader, "QC timeout → ViewChange");
+                self.send_to(next_leader, Message::ViewChange(nv)).await;
+                false
+            }
+        }
+    }
+
+    /// Run a view where this node is the NEXT leader after a view-change.
+    /// Collects 2f+1 ViewChange messages, adopts the highest high_qc,
+    /// then runs a normal leader view.
+    pub async fn run_view_change_leader(&mut self, payload: Vec<u8>) -> Option<QuorumCertificate> {
+        let timeout = tokio::time::Duration::from_millis(1000);
+        let deadline = tokio::time::Instant::now() + timeout;
+        let mut collector = NewViewCollector::new(self.inner.n, self.inner.f);
+
+        loop {
+            let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+            if remaining.is_zero() {
+                info!(node = self.inner.id, "view-change collection timed out");
+                return None;
+            }
+            match tokio::time::timeout(remaining, self.rx.recv()).await {
+                Ok(Some(Message::ViewChange(nv))) => {
+                    let vc_view = nv.view;
+                    if let Some(best_qc) = collector.add(nv) {
+                        info!(
+                            node = self.inner.id,
+                            from_view = vc_view,
+                            best_qc_view = best_qc.view,
+                            "view-change quorum reached"
+                        );
+                        // adopt highest QC seen across all view-change messages
+                        if best_qc.view >= self.inner.high_qc.view {
+                            self.inner.high_qc = best_qc;
+                        }
+                        // now run normal leader protocol
+                        return self.run_leader_view(payload).await;
+                    }
+                }
+                _ => return None,
+            }
         }
     }
 }
